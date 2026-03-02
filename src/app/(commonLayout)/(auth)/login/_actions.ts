@@ -5,6 +5,7 @@ import { setTokenInCookies } from "@/lib/tokenUtils";
 import { ApiErrorResponse } from "@/types/api.types";
 import { ILoginResponse } from "@/types/auth.type";
 import { ILoginPayload, loginZodSchema } from "@/zod/auth.validation";
+import { redirect } from "next/navigation";
 
 export const loginAction=async(payload:ILoginPayload):Promise<ILoginResponse | ApiErrorResponse> =>{
     const parsedPayload=loginZodSchema.safeParse(payload);
@@ -22,9 +23,7 @@ export const loginAction=async(payload:ILoginPayload):Promise<ILoginResponse | A
         await setTokenInCookies("accessToken",accessToken);
         await setTokenInCookies("refreshToken",refreshToken);
         await setTokenInCookies("better-auth.session_token",token);
-
-
-        return response.data;
+        redirect("/dashboard");
         
     } catch (error:any) {
         return {
