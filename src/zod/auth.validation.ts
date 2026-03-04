@@ -1,9 +1,12 @@
-import z, { email } from 'zod'
+import z from 'zod'
 
 
 export const loginZodSchema = z.object({
     email:z.email("Invalid email address"),
-    password:z.string().min(1,"Password is required").regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/, "Password must contain at least one letter, one number, and one special character")
+    password:z.string()
+    .min(6,"Password must be at least 6 characters")
+    .min(1,"Password is required")
+    // .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/, "Password must contain at least one letter, one number, and one special character")
 })
 
 export type ILoginPayload=z.infer<typeof loginZodSchema>

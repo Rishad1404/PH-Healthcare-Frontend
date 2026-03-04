@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import React from "react";
 
 type AppSubmitButtonProps = {
@@ -24,7 +25,12 @@ const AppSubmitButton = ({
     disabled={isDisabled}
     className={cn("w-full", className)}
     >
-      {isPending ? pendingLabel : children}
+      {isPending ?(
+        <>
+            <Loader2 className="animate-spin" aria-hidden="true"/>
+            {pendingLabel ? pendingLabel : children}
+        </>
+      ) : children}
     </Button>
   );
 };
