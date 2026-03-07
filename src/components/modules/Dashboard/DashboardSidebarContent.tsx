@@ -22,17 +22,22 @@ const DashboardSidebarContent = ({
 }: DashboardSidebarContentProps) => {
   const pathname = usePathname();
   return (
-    <div className="hidden md:flex h-full w-64 flex-col border-r bg-card">
-      {/* Logo or Brand Name */}
-      <div className=" flex h-16 items-center border-b px-6">
+    <div className="hidden md:flex h-screen w-64 flex-col border-r bg-card">
+      {/* Logo or Brand Name - Fixed */}
+      <div className="flex h-15 items-center border-b px-6 shrink-0 bg-linear-to-r from-blue-50 to-blue-25">
         <Link href={dashboardHome}>
-          <span className="text-xl font-bold text-primary">PH Healthcare</span>
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">PH</span>
+            </div>
+            <span className="text-lg font-bold bg-linear-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">Healthcare</span>
+          </div>
         </Link>
       </div>
 
-      {/* Navigation Area */}
-      <ScrollArea className=" flex-1 px-3 py-4">
-        <nav className="space-y-6">
+      {/* Navigation Area - Scrollable */}
+      <ScrollArea className="flex-1 overflow-hidden">
+        <nav className="space-y-6 px-3 py-4">
           {navItems.map((section, sectionId) => (
             <div key={sectionId}>
               {section.title && (
@@ -54,7 +59,7 @@ const DashboardSidebarContent = ({
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all",
                         isActive
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-blue-600 text-white"
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       )}
                     >
@@ -71,17 +76,17 @@ const DashboardSidebarContent = ({
         </nav>
       </ScrollArea>
 
-      {/* User Info at bottom */}
-      <div className=" border-t px-3 py-4">
-        <div className=" flex items-center gap-3">
-          <div className=" h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+      {/* User Info at bottom - Fixed */}
+      <div className="border-t px-3 py-4 shrink-0 bg-card">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <span className="text-sm font-semibold text-primary">
               {userInfo.name.charAt(0).toUpperCase()}
             </span>
           </div>
-          <div className=" flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <p className="text-sm font-medium truncate">{userInfo.name}</p>
-            <p className=" text-xs text-muted-foreground capitalize">
+            <p className="text-xs text-muted-foreground capitalize">
               {userInfo.role.toLocaleLowerCase().replace("_", " ")}
             </p>
           </div>

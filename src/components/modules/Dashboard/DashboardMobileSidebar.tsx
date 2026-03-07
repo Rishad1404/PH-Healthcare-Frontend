@@ -23,9 +23,9 @@ const DashboardMobileSidebar = ({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Logo or Brand */}
-      <div className="flex h-16 items-center border-b px-6">
+    <div className="flex h-screen flex-col bg-white">
+      {/* Logo or Brand - Fixed */}
+      <div className="flex h-16 items-center border-b px-6 flex-shrink-0">
         <Link href={dashboardHome}>
           <span className="text-xl font-bold text-primary">PH Healthcare</span>
         </Link>
@@ -33,10 +33,9 @@ const DashboardMobileSidebar = ({
 
       <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
 
-      {/*Navigation Area*/}
-
-      <ScrollArea className="flex-1 px-3 py-4">
-        <nav>
+      {/*Navigation Area - Scrollable */}
+      <ScrollArea className="flex-1 overflow-hidden">
+        <nav className="px-3 py-4">
           {navItems.map((section, sectionId) => (
             <div key={sectionId}>
               {section.title && (
@@ -74,19 +73,18 @@ const DashboardMobileSidebar = ({
         </nav>
       </ScrollArea>
 
-      {/* User Info at bottom */}
-      <div className=" border-t p-4">
-        <div className=" flex items-center gap-3">
-          <div className=" h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-
-          {/* If profile photo doesn't exists, use first letter of name */}
+      {/* User Info at bottom - Fixed */}
+      <div className="border-t p-4 flex-shrink-0 bg-white">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            {/* If profile photo doesn't exists, use first letter of name */}
             <span className="text-sm font-semibold text-primary">
               {userInfo.name.charAt(0).toUpperCase()}
             </span>
           </div>
-          <div className=" flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <p className="text-sm font-medium truncate">{userInfo.name}</p>
-            <p className=" text-xs text-muted-foreground capitalize">
+            <p className="text-xs text-muted-foreground capitalize">
               {userInfo.role.toLocaleLowerCase().replace("_", " ")}
             </p>
           </div>
