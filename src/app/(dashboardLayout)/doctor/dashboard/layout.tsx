@@ -5,7 +5,6 @@ export default function DoctorDashboardLayout({
 }>) {
   return (
     <>
-        Doctor Dashboard Layout
         {children}
     </>
   );

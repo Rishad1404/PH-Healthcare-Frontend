@@ -31,10 +31,12 @@ export const loginAction = async (
     await setTokenInCookies("accessToken", accessToken);
     await setTokenInCookies("refreshToken", refreshToken);
     await setTokenInCookies("better-auth.session_token", token, 24 * 60 * 60);
-    if(!emailVerified){
-      redirect("/verify-email");
-    }
-    else if(needPasswordChange){
+
+    // if(!emailVerified){
+    //   redirect("/verify-email");
+    // }
+
+    if(needPasswordChange){
       // TODO: Refactoring
       redirect(`/reset-password?email=${email}`);
     }else{
@@ -51,6 +53,11 @@ export const loginAction = async (
     ) {
       throw error;
     }
+
+    if(error && error.response && error.response.data.message === "Email not verified"){
+      redirect(`/verify-email?email=${payload.email}`);
+    }
+    
     return {
       success: false,
       message: `Login Failed ${error.message}`,
