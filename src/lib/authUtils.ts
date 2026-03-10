@@ -83,6 +83,7 @@ export const getDefaultDashboardRoute=(role:UserRole)=>{
 
 export const isValidRedirectForRole=(redirectPath:string,role:UserRole)=>{
     const unifySuperAdminAndAdminRole=role==="SUPER_ADMIN"?"ADMIN":role;
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     role===unifySuperAdminAndAdminRole
     const routeOwner=getRouteOwner(redirectPath);
     if(routeOwner===null || routeOwner==="COMMON"){
