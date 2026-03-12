@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/incompatible-library */
 "use client";
 
-import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from "@tanstack/react-table";
 import { getDoctors } from "@/services/doctor.services";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -12,13 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { IDoctor } from "@/types/doctor.types";
 
 const DoctorsTable = () => {
-  const doctorsColumns = [
+  const doctorsColumns:ColumnDef<IDoctor>[] = [
     { accessorKey: "name", header: "Name" },
-    { accessorKey: "specialization", header: "Specialization" },
+    // { accessorKey: "specialization", header: "Specialization" },
     { accessorKey: "experience", header: "Experience" },
-    { accessorKey: "rating", header: "Rating" },
+    // { accessorKey: "rating", header: "Rating" },
   ];
 
   const { data: doctorDataResponse } = useQuery({
