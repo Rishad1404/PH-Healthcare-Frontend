@@ -1,28 +1,16 @@
 /* eslint-disable react-hooks/incompatible-library */
 "use client";
 
-import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from "@tanstack/react-table";
 import { getDoctors } from "@/services/doctor.services";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { IDoctor } from "@/types/doctor.types";
+import DataTable from "@/components/shared/table/DataTable";
+import { doctorsColumns } from "./doctorsColumns";
 
 const DoctorsTable = () => {
-  const doctorsColumns:ColumnDef<IDoctor>[] = [
-    { accessorKey: "name", header: "Name" },
-    // { accessorKey: "specialization", header: "Specialization" },
-    { accessorKey: "experience", header: "Experience" },
-    // { accessorKey: "rating", header: "Rating" },
-  ];
 
-  const { data: doctorDataResponse } = useQuery({
+  const { data: doctorDataResponse,isLoading } = useQuery({
     queryKey: ["doctors"],
     queryFn: getDoctors,
   });
@@ -31,40 +19,68 @@ const DoctorsTable = () => {
 
   const { data: doctors } = doctorDataResponse! || [];
 
-  const { getHeaderGroups, getRowModel } = useReactTable({
-    data: doctors,
-    columns: doctorsColumns,
-    getCoreRowModel: getCoreRowModel(),
-  });
+  const handleView = (doctor: IDoctor) => {
+    console.log(doctor);
+  };
+
+  const handleEdit = (doctor: IDoctor) => {
+    console.log(doctor);
+  };
+
+  const handleDelete = (doctor: IDoctor) => {
+    console.log(doctor);
+  };
+
+  // const { getHeaderGroups, getRowModel } = useReactTable({
+  //   data: doctors,
+  //   columns: doctorsColumns,
+  //   getCoreRowModel: getCoreRowModel(),
+  // });
 
   console.log(doctors);
 
+  // return (
+  //   <Table>
+  //     <TableHeader>
+  //       {getHeaderGroups().map((hg) => (
+  //         <TableRow key={hg.id}>
+  //           {hg.headers.map((header) => (
+  //             <TableHead key={header.id}>
+  //               {flexRender(header.column.columnDef.header, header.getContext())}
+  //             </TableHead>
+  //           ))}
+  //         </TableRow>
+  //       ))}
+  //     </TableHeader>
+  //     <TableBody>
+  //       {getRowModel().rows.map((row) => (
+  //         <TableRow key={row.id}>
+  //           {row.getVisibleCells().map((cell) => (
+  //             <TableCell key={cell.id}>
+  //               {flexRender(cell.column.columnDef.cell, cell.getContext())}
+  //             </TableCell>
+  //           ))}
+  //         </TableRow>
+  //       ))}
+  //     </TableBody>
+  //   </Table>
+  // );
+
   return (
-    <Table>
-      <TableHeader>
-        {getHeaderGroups().map((hg) => (
-          <TableRow key={hg.id}>
-            {hg.headers.map((header) => (
-              <TableHead key={header.id}>
-                {flexRender(header.column.columnDef.header, header.getContext())}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {getRowModel().rows.map((row) => (
-          <TableRow key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <TableCell key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
+    <DataTable
+      data={doctors}
+      columns={doctorsColumns}
+      isLoading={isLoading}
+      emptyMessage="No doctors found"
+      actions={
+        {
+          onView: handleView,
+          onEdit: handleEdit,
+          onDelete: handleDelete,
+        }
+      }
+    />
+  )
 };
 
 export default DoctorsTable;
