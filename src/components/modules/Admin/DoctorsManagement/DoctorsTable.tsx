@@ -1,86 +1,83 @@
-/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
-import { getDoctors } from "@/services/doctor.services";
-import { useQuery } from "@tanstack/react-query";
-
-import { IDoctor } from "@/types/doctor.types";
 import DataTable from "@/components/shared/table/DataTable";
+import { getDoctors } from "@/services/doctor.services";
+import { IDoctor } from "@/types/doctor.types";
+import { useQuery } from "@tanstack/react-query";
+import { SortingState } from "@tanstack/react-table";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { doctorsColumns } from "./doctorsColumns";
 
-const DoctorsTable = () => {
+const DoctorsTable = ({ initialQueryString }: { initialQueryString: string }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  const { data: doctorDataResponse,isLoading } = useQuery({
-    queryKey: ["doctors"],
-    queryFn: getDoctors,
+  const queryString = searchParams.toString() || initialQueryString;
+
+  const sortingStateFromUrl = useMemo<SortingState>(() => {
+    const sortBy = searchParams.get("sortBy");
+    const sortOrder = searchParams.get("sortOrder");
+
+    if (!sortBy || (sortOrder !== "asc" && sortOrder !== "desc")) {
+      return [];
+    }
+
+    return [{ id: sortBy, desc: sortOrder === "desc" }];
+  }, [searchParams]);
+
+  const [optimisticSortingState, setOptimisticSortingState] = useState<SortingState>(sortingStateFromUrl);
+
+  const { data: doctorDataResponse, isLoading } = useQuery({
+    queryKey: ["doctors", queryString],
+    queryFn: () => getDoctors(queryString),
   });
 
-  // console.log(data?.data.map((doctor)=>doctor.name));
+  const doctors = doctorDataResponse?.data ?? [];
 
-  const { data: doctors } = doctorDataResponse! || [];
+  const handleSortingChange = useCallback((state: SortingState) => {
+    setOptimisticSortingState(state); // update arrow immediately
 
-  const handleView = (doctor: IDoctor) => {
-    console.log(doctor);
-  };
+    const params = new URLSearchParams(window.location.search);
 
-  const handleEdit = (doctor: IDoctor) => {
-    console.log(doctor);
-  };
+    if (state[0]) {
+      params.set("sortBy", state[0].id);
+      params.set("sortOrder", state[0].desc ? "desc" : "asc");
+    } else {
+      params.delete("sortBy");
+      params.delete("sortOrder");
+    }
 
-  const handleDelete = (doctor: IDoctor) => {
-    console.log(doctor);
-  };
+    window.history.pushState(null, "", `${pathname}?${params.toString()}`); // URL updates immediately
 
-  // const { getHeaderGroups, getRowModel } = useReactTable({
-  //   data: doctors,
-  //   columns: doctorsColumns,
-  //   getCoreRowModel: getCoreRowModel(),
-  // });
+    startTransition(() => {
+      router.refresh(); // triggers server re-fetch, isPending = true during this
+    });
+  }, [pathname, router]);
 
-  console.log(doctors);
-
-  // return (
-  //   <Table>
-  //     <TableHeader>
-  //       {getHeaderGroups().map((hg) => (
-  //         <TableRow key={hg.id}>
-  //           {hg.headers.map((header) => (
-  //             <TableHead key={header.id}>
-  //               {flexRender(header.column.columnDef.header, header.getContext())}
-  //             </TableHead>
-  //           ))}
-  //         </TableRow>
-  //       ))}
-  //     </TableHeader>
-  //     <TableBody>
-  //       {getRowModel().rows.map((row) => (
-  //         <TableRow key={row.id}>
-  //           {row.getVisibleCells().map((cell) => (
-  //             <TableCell key={cell.id}>
-  //               {flexRender(cell.column.columnDef.cell, cell.getContext())}
-  //             </TableCell>
-  //           ))}
-  //         </TableRow>
-  //       ))}
-  //     </TableBody>
-  //   </Table>
-  // );
+  const handleView = (doctor: IDoctor) => console.log(doctor);
+  const handleEdit = (doctor: IDoctor) => console.log(doctor);
+  const handleDelete = (doctor: IDoctor) => console.log(doctor);
 
   return (
     <DataTable
       data={doctors}
       columns={doctorsColumns}
-      isLoading={isLoading}
-      emptyMessage="No doctors found"
-      actions={
-        {
-          onView: handleView,
-          onEdit: handleEdit,
-          onDelete: handleDelete,
-        }
-      }
+      isLoading={isLoading || isPending} // overlay shows while server re-fetches
+      emptyMessage="No doctors found."
+      sorting={{
+        state: optimisticSortingState,
+        onSortingChange: handleSortingChange,
+      }}
+      actions={{
+        onView: handleView,
+        onEdit: handleEdit,
+        onDelete: handleDelete,
+      }}
     />
-  )
+  );
 };
 
 export default DoctorsTable;
