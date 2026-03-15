@@ -2,8 +2,6 @@
 import { ApiResponse } from "@/types/api.types";
 import axios from "axios";
 import { isTokenExpiringSoon } from "../tokenUtils";
-import { cookies, headers } from "next/headers";
-import { getNewTokensWithRefreshToken } from "@/services/auth.services";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -16,43 +14,73 @@ async function tryRefreshToken(accessToken: string, refreshToken: string): Promi
     return;
   }
 
-  const requestHeader = await headers();
-
-  if (requestHeader.get("x-token-refresh") === "1") {
-    return;
-  }
-
   try {
-    await getNewTokensWithRefreshToken(refreshToken);
+    // tryRefreshToken is server-only because it depends on next/headers/cookies
+    // and internal auth services. If this function is called on the client it
+    // should be a no-op.
+    const headersMod = await import("next/headers");
+    const requestHeader = await headersMod.headers();
+
+    if (requestHeader.get("x-token-refresh") === "1") {
+      return;
+    }
+
+    const authServices = await import("@/services/auth.services");
+    await authServices.getNewTokensWithRefreshToken(refreshToken);
   } catch (error: any) {
     console.log("Error refreshing token", error);
   }
 }
 
+/**
+ * Create an axios instance appropriate to the runtime.
+ * - On the server we need to read cookies() and inject Cookie header so
+ *   the backend receives authentication.
+ * - On the client (browser) we rely on the browser to send auth cookies and
+ *   set withCredentials: true so cross-site cookies are included when needed.
+ */
 const axiosInstance = async () => {
-  const cookieStore = await cookies();
+  // If window is undefined => server-side
+  if (typeof window === "undefined") {
+    // server
+  const headersMod = await import("next/headers");
+  const cookieStore = await headersMod.cookies();
 
-  const accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const refreshToken = cookieStore.get("refreshToken")?.value;
 
-  if (accessToken && refreshToken) {
-    await tryRefreshToken(accessToken, refreshToken);
+    if (accessToken && refreshToken) {
+      await tryRefreshToken(accessToken, refreshToken);
+    }
+
+    const cookieHeader = cookieStore
+      .getAll()
+      .map((cookie: any) => `${cookie.name}=${cookie.value}`)
+      .join("; ");
+
+    const instance = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 30000,
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookieHeader,
+      },
+    });
+
+    return instance;
   }
 
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((cookie) => `${cookie.name}=${cookie.value}`)
-    .join("; ");
-  // eg Cookie : accessToken=token; refreshToken=token
-
+  // client (browser)
   const instance = axios.create({
     baseURL: API_BASE_URL,
     timeout: 30000,
     headers: {
       "Content-Type": "application/json",
-      Cookie: cookieHeader,
     },
+    // allow browser to include cookies for auth (if API is same-site or CORS allows)
+    withCredentials: true,
   });
+
   return instance;
 };
 

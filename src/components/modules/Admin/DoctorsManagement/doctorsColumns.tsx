@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-no-undef */
+ 
 import DateCell from "@/components/shared/cell/DateCell";
 import StatusBadgeCell from "@/components/shared/cell/StatusBadgeCell";
 import UserInfoCell from "@/components/shared/cell/UserInfoCell";
@@ -81,7 +81,7 @@ export const doctorsColumns: ColumnDef<IDoctor>[] = [
     cell: ({ row }) => {
       return (
         <span className="text-sm font-semibold text-green-600">
-            {row.original?.appointmentFee?.toFixed(2) ?? "N/A"} years
+           BDT {row.original?.appointmentFee?.toFixed(2) ?? "N/A"}
         </span>
       );
     },
